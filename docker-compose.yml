@@ -1,0 +1,83 @@
+version: "3.8"
+
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: fitness_app:local
+    container_name: fitness_app
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./:/var/www/html:cached
+      - ./storage:/var/www/html/storage
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:stable
+    container_name: fitness_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./public:/var/www/html/public:ro
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: fitness_db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7
+    container_name: fitness_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  worker:
+    image: fitness_app:local
+    container_name: fitness_worker
+    command: sh -c "php artisan queue:work redis --sleep=3 --tries=3 --timeout=90"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - ./:/var/www/html:cached
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
