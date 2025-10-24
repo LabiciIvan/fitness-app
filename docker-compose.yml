@@ -1,6 +1,6 @@
 services:
 
-  laravel-queues:
+  fitness-app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -35,7 +35,7 @@ services:
 
   redis:
     image: redis:alpine
-    container_name: laravel-redis
+    container_name: fitness-app-redis
     restart: always
     ports:
       - "6379:6379"
