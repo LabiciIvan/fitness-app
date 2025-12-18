@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestPatchProgram;
 use App\Http\Requests\RequestStoreProgram;
+use App\Models\Categories;
 use App\Models\Program;
 use App\Models\Tag;
 use App\Models\User;
@@ -72,15 +73,19 @@ class ProgramController extends Controller
 
     public function show(Program $program) {
 
-        $program->load('user');
+        $program->load('user', 'reviews');
 
-        return view('programs.show', ['program' => $program]);
+        return view('programs.show', [
+            'program'   => $program,
+            'user'      => Auth::user(),
+        ]);
     }
 
     public function create() {
         return view('programs.create', [
             'user' => Auth::user(),
-            'tags'  => Tag::all(), 
+            'tags'  => Tag::all(),
+            'categories'  => Categories::all(),
         ]);
     }
 
@@ -122,6 +127,12 @@ class ProgramController extends Controller
             $program->tags()->attach($tagIds);
         }
 
+        if (isset($attributes['category'])) {
+            $categoryIds = Categories::where('title', 'LIKE', "%" . $attributes['category'] . "%")->pluck('id');
+
+            $program->categories()->attach($categoryIds);
+        }
+
         return redirect()->route('trainers.index.programs');
     }
 
@@ -130,7 +141,7 @@ class ProgramController extends Controller
         return view('programs.edit', [
             'user' => Auth::user(),
             'tags'  => Tag::all(),
-            'program' => $program->load(['tags']),
+            'program' => $program->load(['tags', 'categories']),
         ]);
     }
 
@@ -143,8 +154,14 @@ class ProgramController extends Controller
 
         $tags = $request->has('tags') ? json_decode($request->get('tags')) : null;
 
+        $category = $request->has('category') ? Categories::where('title', 'LIKE', "%" . $request->get('category') . "%")->pluck('id') : null;
+
         if ($tags) {
             $program->tags()->sync($tags);
+        }
+
+        if ($category) {
+            $program->categories()->sync($category);
         }
 
         return redirect()->route('programs.edit', $program);
@@ -159,7 +176,7 @@ class ProgramController extends Controller
         $program->delete();
 
         if (Gate::authorize('is-trainer')) {
-            return redirect()->route('users.indexPrograms');
+            return redirect()->route('trainers.index.programs');
         }
 
         return redirect()->route('programs.index');
