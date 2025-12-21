@@ -22,9 +22,9 @@ class RequestStoreProgram extends FormRequest
     public function rules(): array
     {
         if ($this->has('tags')) {
-                $this->merge([
-                    'tags' => json_decode($this->tags, true)
-                ]);
+            $this->merge([
+                'tags' => json_decode($this->tags, true)
+            ]);
         }
 
         return [
@@ -35,6 +35,7 @@ class RequestStoreProgram extends FormRequest
             'logo'          => 'required|mimes:jpg,bmp,png|image',
             'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
             'tags'          => 'sometimes|array|exists:tags,id',
+            'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
         ];
     }
 }

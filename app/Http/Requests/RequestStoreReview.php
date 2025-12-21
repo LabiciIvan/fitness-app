@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class RequestPatchProgram extends FormRequest
+class RequestStoreReview extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +22,8 @@ class RequestPatchProgram extends FormRequest
     public function rules(): array
     {
         return [
-            'name'          => 'required|',
-            'description'   => 'required|max:200',
-            'price'         => 'required|',
-            'limit'         => 'required|',
-            'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
-            'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
-            'logo'          => 'sometimes|mimes:jpg,bmp,png|image',
+            'content'   => 'required|max:400',
+            'rating'    => 'required|between:1,5',
         ];
     }
 }
