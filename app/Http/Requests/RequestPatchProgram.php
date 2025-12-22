@@ -2,18 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class RequestPatchProgram extends FormRequest
+class RequestPatchProgram extends Base
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,6 +17,7 @@ class RequestPatchProgram extends FormRequest
             'price'         => 'required|',
             'limit'         => 'required|',
             'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
+            'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
             'logo'          => 'sometimes|mimes:jpg,bmp,png|image',
         ];
     }

@@ -2,18 +2,8 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
-
-class RequestStoreProgram extends FormRequest
+class RequestStoreProgram extends Base
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -22,9 +12,9 @@ class RequestStoreProgram extends FormRequest
     public function rules(): array
     {
         if ($this->has('tags')) {
-                $this->merge([
-                    'tags' => json_decode($this->tags, true)
-                ]);
+            $this->merge([
+                'tags' => json_decode($this->tags, true)
+            ]);
         }
 
         return [
@@ -35,6 +25,7 @@ class RequestStoreProgram extends FormRequest
             'logo'          => 'required|mimes:jpg,bmp,png|image',
             'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
             'tags'          => 'sometimes|array|exists:tags,id',
+            'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
         ];
     }
 }
