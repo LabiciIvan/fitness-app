@@ -4,22 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RequestStoreProfile;
 use App\Models\Profile;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
     public function create() {
-
         return view('profile.create');
     }
 
     public function storeOrUpdate(RequestStoreProfile $request) {
-
-        $attributes = $request->validated();
-
         $user = Auth::user();
 
         $logoName = null;
@@ -44,14 +38,10 @@ class ProfileController extends Controller
             [
                 'user_id'       => $user->id,
             ],
-            [
-                'sex'           => $attributes['sex'],
-                'description'   => $attributes['description'] ?? '',
-                'country'       => $attributes['country'],
-                'city'          => $attributes['city'],
-                'logo'          => "logos/" . $logoName,
-                'complete'      => true
-            ]
+            array_merge(
+                $request->onlyData(['sex', 'description', 'country', 'city']),
+                ['logo' => "logos/" . $logoName, 'complete' => true]
+            )
         );
 
         return redirect()->route('dashboard.index');

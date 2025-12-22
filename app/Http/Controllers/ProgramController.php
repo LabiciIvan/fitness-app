@@ -8,6 +8,7 @@ use App\Models\Categories;
 use App\Models\Program;
 use App\Models\Tag;
 use App\Models\User;
+use App\Services\EnrollmentsFilter;
 use App\Services\Search;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +45,7 @@ class ProgramController extends Controller
         ]);
     }
 
-    public function index(Request $request) {
+    public function index(Request $request, EnrollmentsFilter $service) {
 
         $user = Auth::user();
 
@@ -61,7 +62,9 @@ class ProgramController extends Controller
                 paginate: true
             );
         } else {
-            $programs = Program::paginate(5);
+                $filter = $request->get('filter', 'all');
+
+                $programs = $service->get($filter, Auth::user());
         }
 
         return view('programs.index', [
@@ -73,11 +76,18 @@ class ProgramController extends Controller
 
     public function show(Program $program) {
 
+        $user = Auth::user();
+
         $program->load('user', 'reviews');
+
+        $user = User::with('enrollments')->where('id', $user->id)->first();
+
+        $programsEnrolled = $user->enrollments()->pluck('program_id');
 
         return view('programs.show', [
             'program'   => $program,
             'user'      => Auth::user(),
+            'programsEnrolled' => $programsEnrolled
         ]);
     }
 
@@ -111,15 +121,10 @@ class ProgramController extends Controller
             );
         }
 
-        $program = Program::create([
-            'user_id'       => $user->id,
-            'name'          => $attributes['name'],
-            'description'   => $attributes['description'],
-            'price'         => $attributes['price'],
-            'difficulty'    => $attributes['difficulty'],
-            'limit'         => $attributes['limit'],
-            'logo'          => "logos/" . $logoName
-        ]);
+        $program = Program::create(array_merge(
+            $request->onlyData(['name', 'description', 'price', 'difficulty', 'limit']),
+            ['user_id' => $user->id, 'logo' => "logos/" . $logoName ]
+        ));
 
         if (isset($attributes['tags'])) {
             $tagIds = Tag::whereIn('id', $attributes['tags'])->pluck('id');
@@ -146,9 +151,7 @@ class ProgramController extends Controller
     }
 
     public function patch(RequestPatchProgram $request, Program $program) {
-        $attributes = $request->validated();
-
-        $program->update($attributes);
+        $program->update($request->mapped());
 
         $program->load(['tags']);
 
