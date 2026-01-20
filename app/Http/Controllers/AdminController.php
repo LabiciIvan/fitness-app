@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\TagController;
-use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessSendEmailWhenResourceCreated;
+use App\Jobs\SendEmailWhenResourceUpdated;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class AdminController extends Controller
@@ -73,7 +75,7 @@ class AdminController extends Controller
     }
 
     public function callControllerMethodForPost(Request $request, mixed $controller, string $method, ?string $id = null) {
-        if (!isset($this->requests[$controller], $this->maps[$controller])) {
+        if (!isset($this->requestsCreate[$controller], $this->maps[$controller])) {
             abort(404);
         }
 
@@ -104,6 +106,11 @@ class AdminController extends Controller
         foreach ($validationRules as $field => $rule) {
             $data[$field] = $validated[$field];
         }
+
+        $authUser = Auth::user();
+
+        // Send notification email to logged ADMIN when new resource is created, using queue jobs.
+        ProcessSendEmailWhenResourceCreated::dispatch($authUser->email, ucfirst($controller), $data);
 
         return App::call([$controllerInstance, $method], [
             'data' => $data
@@ -142,6 +149,10 @@ class AdminController extends Controller
         foreach ($validationRules as $field => $rule) {
             $data[$field] = $validated[$field];
         }
+
+        $authUser = Auth::user();
+
+        SendEmailWhenResourceUpdated::dispatch($authUser->email, ucfirst($controller), $data, $id);
 
         return App::call([$controllerInstance, $method], [
             'data' => $data,
