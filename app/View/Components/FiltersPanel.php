@@ -152,12 +152,6 @@ class FiltersPanel extends Component
     {
         $this->user = Auth::user();
 
-
-        $types = $this->user->types()->first();
-        Log::debug('--------type------');
-        Log::debug($types);
-        Log::debug('--------type------');
-        
         $this->userConfig = $this->config[$this->user->types()->first()['title']] ?? null;
     }
 
