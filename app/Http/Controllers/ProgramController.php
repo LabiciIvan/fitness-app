@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RequestPatchProgram;
 use App\Http\Requests\RequestStoreProgram;
 use App\Models\Categories;
+use App\Models\Notification;
 use App\Models\Program;
 use App\Models\Tag;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Services\Search;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ProgramController extends Controller
@@ -84,6 +86,16 @@ class ProgramController extends Controller
 
         $programsEnrolled = $user->enrollments()->pluck('program_id');
 
+        // If notification exists, then mark it as "read".
+        $notification = Notification::where('notifiable_type', $program->getMorphClass())
+                ->where('notifiable_id', $program->getKey())
+                ->where('user_id', $this->user->id)
+                ->first();
+
+        if ($notification) {
+            $notification->update(['read' => true]);
+        }
+
         return view('programs.show', [
             'program'   => $program,
             'user'      => Auth::user(),
@@ -122,7 +134,7 @@ class ProgramController extends Controller
         }
 
         $program = Program::create(array_merge(
-            $request->onlyData(['name', 'description', 'price', 'difficulty', 'limit']),
+            $request->onlyData(['name', 'description', 'price', 'difficulty', 'limit', 'schedule']),
             ['user_id' => $user->id, 'logo' => "logos/" . $logoName ]
         ));
 
