@@ -2,11 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Enrollment;
-use App\Models\Notification;
-use App\Models\Program;
 use Carbon\Carbon;
+use App\Models\Program;
 use Illuminate\Console\Command;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Log;
 
 class NotifyUserBeforeProgramStart extends Command
@@ -33,7 +32,7 @@ class NotifyUserBeforeProgramStart extends Command
         $now = Carbon::now();
         $currentDay = $now->isoWeekday();
 
-        $enrollments = Program::with('enrollments')->whereHas('enrollments')->get();
+        $enrollments = Program::with(['enrollments', 'enrolled'])->whereHas('enrollments')->whereHas('enrolled')->get();
 
         foreach($enrollments as $enrollment) {
             $days = $enrollment['schedule']['days'];
@@ -42,13 +41,17 @@ class NotifyUserBeforeProgramStart extends Command
                 if ($day === $currentDay) {
                     $this->info('Enrollment: ' . $enrollment['name'] .  ' (' . $enrollment['id'] . ')' . ' will start today.');
 
-                    foreach ($enrollment['enrollments'] as $enrolledUser) {
+                    foreach ($enrollment['enrolled'] as $enrolledUser) {
                         $this->info('Notification to be sent to: ' . $enrolledUser['email']);
-                        Notification::create([
-                            'details' => 'Your enrollment into program: ' . $enrollment['name'] . ' will start today.',
-                            'action' => $enrollment['id'],
-                            'user_id' => $enrolledUser['id'],
-                        ]);
+
+                        NotificationService::notify(
+                            userId: $enrolledUser['id'],
+                            type: 'program.reminder',
+                            data: [
+                                'program' => $enrollment['name'],
+                            ],
+                            notifiable: $enrollment
+                        );
                     }
                 }
             }
