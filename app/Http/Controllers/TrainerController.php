@@ -85,7 +85,7 @@ class TrainerController extends Controller
         $user = Auth::user();
 
         /** @var App\Models\User $user*/
-        $user->load(['programs.enrolled']);
+        $user->load(['programs.programs']);
 
         return view('trainers.indexClients', [
             'user' => $user,
