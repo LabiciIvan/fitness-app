@@ -19,6 +19,7 @@ class RequestPatchProgram extends Base
             'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
             'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
             'logo'          => 'sometimes|mimes:jpg,bmp,png|image',
+            'schedule'      => 'required|json'
         ];
     }
 }
