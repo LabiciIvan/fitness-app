@@ -26,6 +26,7 @@ class RequestStoreProgram extends Base
             'difficulty'    => 'required|in:' . implode(',', config('tables.programs.difficulty')),
             'tags'          => 'sometimes|array|exists:tags,id',
             'category'      => 'required|in:' . implode(',', config('tables.categories.title')),
+            'schedule'      => 'required|json'
         ];
     }
 }
