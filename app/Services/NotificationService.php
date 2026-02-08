@@ -22,7 +22,7 @@ class NotificationService {
         Notification::create([
             'user_id'         => $userId,
             'type'            => $type,
-            'data'            => json_encode($data),
+            'data'            => $data,
             'notifiable_type' => $notifiable->getMorphClass(),
             'notifiable_id'   => $notifiable->getKey(),
         ]);
