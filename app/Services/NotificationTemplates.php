@@ -15,6 +15,11 @@ class NotificationTemplates {
             'route'   => 'programs.show',
         ],
 
+        'program.unsubscribed.self' => [
+            'message' => 'You\'ve unsubscribed from program ":program".',
+            'route'   => 'programs.show',
+        ],
+
         'program.reminder' => [
             'message' => 'Your enrollment in ":program" starts today.',
             'route'   => 'programs.show',
