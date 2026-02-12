@@ -70,13 +70,13 @@ class FiltersPanel extends Component
                     'routes' => [
                         [
                             'path' => 'admin.callControllerMethod',
-                            'params' => ['controller' => 'types', 'method' => 'create'],
+                            'params' => ['controller' => 'tags', 'method' => 'create'],
                             'inner' => 'Tags'
                         ],
                         [
                             'path' => 'admin.callControllerMethod',
-                            'params' => ['controller' => 'tags', 'method' => 'create'],
-                            'inner' => 'Tags'
+                            'params' => ['controller' => 'types', 'method' => 'create'],
+                            'inner' => 'Types'
                         ],
                         [
                             'path' => 'admin.callControllerMethod',
@@ -85,7 +85,7 @@ class FiltersPanel extends Component
                         ],
                         [
                             'path' => 'admin.callControllerMethod',
-                            'params' => [['controller' => 'categories', 'method' => 'create']],
+                            'params' => ['controller' => 'categories', 'method' => 'create'],
                             'inner' => 'Categories'
                         ],
                     ]
@@ -100,7 +100,7 @@ class FiltersPanel extends Component
                         ],
                         [
                             'path' => 'admin.callControllerMethod',
-                            'params' =>  ['controller' => 'types', 'method' => 'index'],
+                            'params' => ['controller' => 'types', 'method' => 'index'],
                             'inner' => 'Types',
                         ],
                         [
