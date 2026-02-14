@@ -21,6 +21,16 @@ class ProgramFactory extends Factory
             'description'   => fake()->sentence(),
             'price'         => fake()->numberBetween(0, 50),
             'limit'         => fake()->numberBetween(0, 50),
+            'schedule'      => [
+                'days' => [1, 2, 3, 4, 5],
+                'time' => [
+                    1 => ['start' => '07:00', 'end' => '08:00'],
+                    2 => ['start' => '07:00', 'end' => '08:00'],
+                    3 => ['start' => '07:00', 'end' => '08:00'],
+                    4 => ['start' => '07:00', 'end' => '08:00'],
+                    5 => ['start' => '07:00', 'end' => '08:00'],
+                ],
+            ],
             'difficulty'    => fake()->randomElement(config('tables.programs.difficulty')),
             'logo'          => "https://picsum.photos/id/" . fake()->numberBetween(1, 100) . "/90/90",
         ];
